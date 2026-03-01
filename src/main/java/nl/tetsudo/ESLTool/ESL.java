@@ -13,16 +13,18 @@ import java.nio.file.Path;
 
 public class ESL {
 
-    File id;
-    File template;
-    File nasaCode;
+    String id;
+    String template;
+    String nasaCode;
+
+
     String nasa;
     String name;
     Meta meta;
 
 
 
-    public ESL(File id, File template, String nasa, String name, String meta, boolean doGenerate) {
+    public ESL(String id, String template, String nasa, String name, String meta, boolean doGenerate) {
         this.id = id;
         this.template = template;
         this.nasa = nasa;
@@ -37,11 +39,11 @@ public class ESL {
         }
     }
 
-    public File getId() {
+    public String getId() {
         return id;
     }
 
-    public File getTemplate() {
+    public String getTemplate() {
         return template;
     }
 
@@ -57,18 +59,18 @@ public class ESL {
         return meta;
     }
 
-    public File generate() throws WriterException, IOException {
+    public String generate() throws WriterException, IOException {
         int width = 300;
         int height = 100;
 
         BitMatrix matrix = new MultiFormatWriter()
                 .encode(nasa, BarcodeFormat.CODABAR, width, height);
-
-        Path path = FileSystems.getDefault().getPath(EslToolApplication.PATH+nasa+".png");
+        String name = nasa+".png";
+        Path path = FileSystems.getDefault().getPath(EslToolApplication.PATH+name);
         MatrixToImageWriter.writeToPath(matrix, "PNG", path);
 
-        this.nasaCode = path.toFile();
-        return this.nasaCode;
+        this.nasaCode = name;
+        return name;
     }
 
 }

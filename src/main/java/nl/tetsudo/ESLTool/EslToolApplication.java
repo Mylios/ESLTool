@@ -5,7 +5,9 @@ import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.imageio.ImageIO;
@@ -13,24 +15,28 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+
 @SpringBootApplication
+@CrossOrigin(origins = "*")
 @RestController
+@RequestMapping("/api")
 public class EslToolApplication {
 	public static String PATH = "site/files/";
 	public static void main(String[] args) {
 		SpringApplication.run(EslToolApplication.class, args);
 	}
 
-	@GetMapping("/")
+	@GetMapping("/esls")
 	public Map<String, List<ESL>> getESLS() throws IOException {
 		PDDocument doc = PDDocument.load(new File(PATH+"a.pdf"));
 		List<PDImageXObject> images = SequentialImageExtractor.extractImagesSequentially(doc);
-		List<File> imageFiles = new ArrayList<>();
+		List<String> imageNames = new ArrayList<>();
 		int index = 0;
 		for (PDImageXObject image : images) {
-			File f = new File(PATH+"image_" + (index++) + ".png");
+			String name = "image_" + (index++) + ".png";
+			File f = new File(PATH+name);
 			ImageIO.write(image.getImage(), "png", f);
-			imageFiles.add(f);
+			imageNames.add(name);
 		}
 		PDFTextStripper stripper = new PDFTextStripper();
 		String text = stripper.getText(doc);
@@ -64,8 +70,8 @@ public class EslToolApplication {
 					if (i < first.length - 4) name.append(first[i]).append(" ");
 					else meta.append(first[i]).append(" ");
 				}
-				esls.add(new ESL(imageFiles.get(imageCount),
-						imageFiles.get(imageCount + 1),
+				esls.add(new ESL(imageNames.get(imageCount),
+						imageNames.get(imageCount + 1),
 						first[0].replaceAll("\r", ""),
 						name.toString().strip().replaceAll("\r", ""),
 						meta.toString().strip().replaceAll("\r", ""),
@@ -85,8 +91,8 @@ public class EslToolApplication {
 
 			String name = builder.get(1);
 			if (s.split("-").length > 3) {
-				esls.add(new ESL(imageFiles.get(imageCount),
-						imageFiles.get(imageCount + 1),
+				esls.add(new ESL(imageNames.get(imageCount),
+						imageNames.get(imageCount + 1),
 						builder.get(0).replace("\r", ""),
 						builder.get(1),
 						s.replaceAll("\r", ""),
