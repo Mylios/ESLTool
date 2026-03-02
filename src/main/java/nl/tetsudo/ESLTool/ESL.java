@@ -60,11 +60,11 @@ public class ESL {
     }
 
     public String generate() throws WriterException, IOException {
-        int width = 300;
+        int width = 100;
         int height = 100;
 
         BitMatrix matrix = new MultiFormatWriter()
-                .encode(nasa, BarcodeFormat.CODABAR, width, height);
+                .encode(nasa, BarcodeFormat.QR_CODE, width, height);
         String name = nasa+".png";
         Path path = FileSystems.getDefault().getPath(EslToolApplication.PATH+name);
         MatrixToImageWriter.writeToPath(matrix, "PNG", path);

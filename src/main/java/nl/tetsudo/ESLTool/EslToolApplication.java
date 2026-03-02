@@ -120,7 +120,7 @@ public class EslToolApplication {
 
 		Map<String, List<Integer>> isles = new HashMap<>();
 		isles.put("Baby + Haar", Arrays.asList(550,551,562,558));
-
+		isles.put("Pad 1: Rijst, Olie", Arrays.asList(453,458,455,452));
 		Map<String, List<ESL>> aisleESLs = new HashMap<>();
 		for(String s : isles.keySet()){
 			var group = isles.get(s);
