@@ -5,10 +5,7 @@ import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.imageio.ImageIO;
 import java.io.File;
@@ -26,8 +23,8 @@ public class EslToolApplication {
 		SpringApplication.run(EslToolApplication.class, args);
 	}
 
-	@GetMapping("/esls")
-	public Map<String, List<ESL>> getESLS() throws IOException {
+	@PostMapping("/esls")
+	public Map<String, List<ESL>> getESLS(@RequestBody Map<String, List<Integer>> isles, @RequestBody boolean addMissing) throws IOException {
 		PDDocument doc = PDDocument.load(new File(PATH+"a.pdf"));
 		List<PDImageXObject> images = SequentialImageExtractor.extractImagesSequentially(doc);
 		List<String> imageNames = new ArrayList<>();
@@ -118,10 +115,11 @@ public class EslToolApplication {
 			}
 		}
 
-		Map<String, List<Integer>> isles = new HashMap<>();
+//		Map<String, List<Integer>> isles = new HashMap<>();
 		isles.put("Baby + Haar", Arrays.asList(550,551,562,558));
 		isles.put("Pad 1: Rijst, Olie", Arrays.asList(453,458,455,452));
 		Map<String, List<ESL>> aisleESLs = new HashMap<>();
+		Set<Integer> gotten = new HashSet<>();
 		for(String s : isles.keySet()){
 			var group = isles.get(s);
 			List<ESL> l = new ArrayList<>();
@@ -133,10 +131,24 @@ public class EslToolApplication {
                 the same brand will be grouped.
                 Which in turn will (Hopefully) prevent people walking up and down the aisle a lot
                 */
+				gotten.add(i);
 				tmp.sort((a, b) -> String.CASE_INSENSITIVE_ORDER.compare(a.getName(), b.getName()));
 				l.addAll(tmp);
 				aisleESLs.put(s, l);
 			}
+		}
+
+		if(addMissing && gotten.size() <= groups.size()){
+            Set<Integer> missing = new HashSet<>(groups.keySet());
+			missing.removeAll(gotten);
+			List<ESL> l = new ArrayList<>();
+			for(Integer i : missing) {
+				var tmp = groups.getOrDefault(i, new ArrayList<>());
+				gotten.add(i);
+				tmp.sort((a, b) -> String.CASE_INSENSITIVE_ORDER.compare(a.getName(), b.getName()));
+				l.addAll(tmp);
+			}
+			aisleESLs.put("_overig_", l);
 		}
 
 		System.out.println(text);
