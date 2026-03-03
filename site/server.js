@@ -3,16 +3,36 @@ const path = require("path");
 const app = express();
 const fs = require("fs");
 const axios = require("axios");
-
+const multer = require("multer");
 
 
 
 app.use(express.static(path.join(__dirname, "files")));
 app.use(express.static(path.join(__dirname, "pages")));
+app.use(express.static(path.join(__dirname,"tmp")));
+const systemStorage = multer.diskStorage({
+  destination: function (req, file, cb) { cb(null, 'tmp'); },
+  filename: function (req, file, cb) { cb(null, file.originalname); }
+});
+
+const uploadStorage = multer.diskStorage({
+  destination: function (req, file, cb) { cb(null, 'tmp'); },
+  filename: function (req, file, cb) { cb(null, file.originalname); }
+});
+
+const save = multer({ storage: systemStorage });
+const upload = multer({ storage: uploadStorage });
+
+app.post('/upload', save.single('file'), (req, res) => {
+  if (!req.file) return res.status(400).send('No file uploaded.');
+  console.log(`File uploaded: ${req.file.originalname}`);
+  res.send(`File '${req.file.originalname}' uploaded successfully.`);
+});
+
 
 app.get("/", (req, res) => {
     console.log("req received");
-    res.sendFile(__dirname + "/pages/index.html");
+    res.sendFile(__dirname + "/pages/exported.html");
 });
 
 app.get("/images", (req, res) => {

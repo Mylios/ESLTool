@@ -44,6 +44,7 @@ document.addEventListener("DOMContentLoaded", async (e) => {
         }
 
         th.innerHTML = el ;
+        th.setAttribute("class","page-break-before");
         let count = document.createElement("p");
         count.innerHTML="Klein totaal: " + counts[0] + " Groot totaal: " + counts[1];
         th.appendChild(count);
