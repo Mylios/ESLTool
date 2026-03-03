@@ -8,8 +8,9 @@ const multer = require("multer");
 
 
 app.use(express.static(path.join(__dirname, "files")));
-app.use(express.static(path.join(__dirname, "pages")));
-app.use(express.static(path.join(__dirname,"tmp")));
+app.use(express.static(path.join(__dirname, "html")));
+
+
 const systemStorage = multer.diskStorage({
   destination: function (req, file, cb) { cb(null, 'tmp'); },
   filename: function (req, file, cb) { cb(null, file.originalname); }
@@ -32,7 +33,7 @@ app.post('/upload', save.single('file'), (req, res) => {
 
 app.get("/", (req, res) => {
     console.log("req received");
-    res.sendFile(__dirname + "/pages/exported.html");
+    res.sendFile(__dirname + "/html/pages/index.html");
 });
 
 app.get("/images", (req, res) => {
@@ -50,12 +51,11 @@ app.get("/images", (req, res) => {
   });
 });
 
-app.get("/esls", async (req, res) => {
+app.get("/esls",upload.single('file'), async (req, res) => {
   try {
-    const response = await axios.get("http://localhost:8080/api/esls");
-
-    res.json(response.data);
-
+    // const response = await axios.get("http://localhost:8080/api/esls");
+    // res.json(response.data);
+    toBackend(req,res,"")
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ error: "Spring server failed" });
@@ -73,7 +73,7 @@ app.listen(3000, () => {
 async function toBackend(req, res, url) {
   if (!req.file) return res.status(400).send('No file uploaded.');
   console.log(`File uploaded: ${req.file.originalname}`);
-  const absolutePath = path.resolve(__dirname, 'files/uploads/' + req.file.originalname);
+  const absolutePath = path.resolve(__dirname, 'files/tmp/' + req.file.originalname);
   const response = await fetch(`http://${IP}:8080/` + url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
