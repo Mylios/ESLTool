@@ -1,4 +1,4 @@
-package nl.tetsudo.ESLTool;
+package nl.tetsudo.ESLTool.esls;
 public class Meta {
     String id;
     String type;

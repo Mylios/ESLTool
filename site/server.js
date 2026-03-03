@@ -65,3 +65,27 @@ app.get("/esls", async (req, res) => {
 app.listen(3000, () => {
     console.log("Sup, we runnin");
 });
+
+
+
+
+
+async function toBackend(req, res, url) {
+  if (!req.file) return res.status(400).send('No file uploaded.');
+  console.log(`File uploaded: ${req.file.originalname}`);
+  const absolutePath = path.resolve(__dirname, 'files/uploads/' + req.file.originalname);
+  const response = await fetch(`http://${IP}:8080/` + url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ filePath: absolutePath.toString(), isles: req.isles, addMissing: req.addMissing })
+  });
+  unlinkAsync(absolutePath);
+  if (!response.ok) {
+    res.setHeader('error', response.headers.get("error"));
+    res.status = 400;
+  }
+  res.setHeader('Content-Disposition', response.headers.get('content-disposition'));
+  res.setHeader('Content-Type', response.headers.get('content-type'));
+  const buffer = Buffer.from(await response.arrayBuffer());
+  res.send(buffer);
+}

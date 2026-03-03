@@ -1,4 +1,4 @@
-package nl.tetsudo.ESLTool;
+package nl.tetsudo.ESLTool.util;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.pdfbox.contentstream.PDFStreamEngine;
 import org.apache.pdfbox.contentstream.operator.DrawObject;
 import org.apache.pdfbox.contentstream.operator.Operator;
+import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -21,7 +22,7 @@ public class SequentialImageExtractor extends PDFStreamEngine {
         addOperator(new DrawObject());
     }
 
-    protected void processOperator(Operator operator, List<org.apache.pdfbox.cos.COSBase> operands) throws IOException {
+    protected void processOperator(Operator operator, List<COSBase> operands) throws IOException {
         String operation = operator.getName();
 
         if ("Do".equals(operation)) {
