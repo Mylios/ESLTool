@@ -32,6 +32,16 @@ public class EslToolApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(EslToolApplication.class, args);
+        File f = new File("site/files/tmp");
+        if(!f.isDirectory()){
+            LogManager.log("files/tmp does not exist, attempting to create");
+            if(f.mkdirs()){
+                LogManager.success("files/tmp has been created");
+            }else{
+                LogManager.failure("files/tmp was failed to be created. Terminating.");
+                return;
+            }
+        }
     }
 
 
