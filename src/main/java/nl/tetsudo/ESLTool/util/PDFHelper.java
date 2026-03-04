@@ -27,7 +27,7 @@ public class PDFHelper {
         return imageNames;
     }
 
-    public List<ESL> readESLS(PDDocument doc, List<String> images) throws IOException {
+    public List<ESL> readESLS(PDDocument doc, List<String> images,int id) throws IOException {
         PDFTextStripper stripper = new PDFTextStripper();
         String text = stripper.getText(doc);
         List<ESL> esls = new ArrayList<>();
@@ -61,7 +61,7 @@ public class PDFHelper {
                     else meta.append(first[i]).append(" ");
                 }
 
-                esls.add(create(images, imageCount, first[0], name.toString(), meta.toString()));
+                esls.add(create(images, imageCount, first[0], name.toString(), meta.toString(),id));
 
                 imageCount += 2;
                 continue;
@@ -77,7 +77,7 @@ public class PDFHelper {
 
             String name = builder.get(1);
             if (s.split("-").length > 3) {
-                esls.add(create(images, imageCount, builder.get(0), builder.get(1), s));
+                esls.add(create(images, imageCount, builder.get(0), builder.get(1), s,id));
                 builder.clear();
                 imageCount += 2;
             } else {
@@ -103,18 +103,18 @@ public class PDFHelper {
         return groups;
     }
 
-    public Map<Integer, List<ESL>> getInstantGroups(PDDocument doc, List<String> images) throws IOException {
-        return getGroups(readESLS(doc,images));
+    public Map<Integer, List<ESL>> getInstantGroups(PDDocument doc, List<String> images,int id) throws IOException {
+        return getGroups(readESLS(doc,images,id));
     }
 
 
-    private ESL create(List<String> images, int image, String nasa, String name, String meta) {
+    private ESL create(List<String> images, int image, String nasa, String name, String meta, int id) {
         return new ESL(images.get(image),
                 images.get(image + 1),
                 nasa.replace("\r", ""),
                 name.strip().replaceAll("\r", ""),
                 meta.replaceAll("\r", ""),
-                true);
+                id);
     }
 
 }

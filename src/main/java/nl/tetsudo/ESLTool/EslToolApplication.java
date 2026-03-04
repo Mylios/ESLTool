@@ -1,11 +1,14 @@
 package nl.tetsudo.ESLTool;
 
 import nl.tetsudo.ESLTool.esls.ESL;
+import nl.tetsudo.ESLTool.util.LogManager;
 import nl.tetsudo.ESLTool.util.PDFHelper;
+import nl.tetsudo.ESLTool.wrappers.ESLRequest;
 import nl.tetsudo.ESLTool.wrappers.FilePathRequest;
 import nl.tetsudo.ESLTool.wrappers.Returnable;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.cert.TrustAnchor;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -31,29 +35,29 @@ public class EslToolApplication {
     }
 
 
-    @DeleteMapping
-    public void deleteFolder(@RequestBody int id) {
-        File folder = new File(PATH + id);
-        folder.delete();
+    @DeleteMapping("/delete/{id}")
+    public void deleteFolder(@PathVariable int id) {
+        try {
+            LogManager.log("Folder '" + id + "' requested to be deleted");
+            FileUtils.deleteDirectory(new File(PATH + id));
+        }catch (Exception e){
+            LogManager.error("Failed to delete directory '" + id + "'");
+        }
     }
 
     @PostMapping("/esls")
-    public ResponseEntity<Returnable> getESLS(@RequestBody FilePathRequest pdf, @RequestBody Map<String, List<Integer>> isles, @RequestBody boolean addMissing) {
+    public ResponseEntity<Returnable> getESLS(@RequestBody ESLRequest request) {
         int id = REQ.getAndIncrement();
         String path = PATH + id + "/";
+        LogManager.log("Request for process initiated for file '" + request.getFilePath() + "' id assigned is '"+id+"'");
         try {
             new File(PATH + id).mkdir();
 
-            PDDocument doc = PDDocument.load(new File(pdf.getFilePath()));
+            PDDocument doc = PDDocument.load(new File(request.getFilePath()));
             List<String> images = helper.getNames(doc, path);
-
-
-            Map<Integer, List<ESL>> groups = helper.getInstantGroups(doc,images);
-
-            isles.put("Baby + Haar", Arrays.asList(550, 551, 562, 558));
-            isles.put("Pad 1: Rijst, Olie", Arrays.asList(453, 458, 455, 452));
-
-
+            var isles = request.getIsles();
+            LogManager.log("Found " + isles.size() + " aisles for id="+id);
+            Map<Integer, List<ESL>> groups = helper.getInstantGroups(doc,images,id);
             Map<String, List<ESL>> aisleESLs = new HashMap<>();
             Set<Integer> gotten = new HashSet<>();
             for (String s : isles.keySet()) {
@@ -75,8 +79,8 @@ public class EslToolApplication {
                     aisleESLs.put(s, l);
                 }
             }
-
-            if (addMissing && gotten.size() <= groups.size()) {
+            LogManager.log("Assigned " + gotten.size() + " groups for id="+id);
+            if (request.isAddMissing() && gotten.size() <= groups.size()) {
                 Set<Integer> missing = new HashSet<>(groups.keySet());
                 missing.removeAll(gotten);
                 List<ESL> l = new ArrayList<>();
@@ -87,12 +91,14 @@ public class EslToolApplication {
                     l.addAll(tmp);
                 }
                 aisleESLs.put("_overig_", l);
+                LogManager.log("Assigned "+ l.size() + " ESLs to unassigned for id="+id);
             }
 
             doc.close();
             return ResponseEntity.ok(new Returnable(aisleESLs,id));
         } catch (IOException e) {
-            ResponseEntity.internalServerError();
+            LogManager.error(e.getMessage() + "\n ^^for id="+id);
+            return ResponseEntity.internalServerError().build();
         }
     }
 }

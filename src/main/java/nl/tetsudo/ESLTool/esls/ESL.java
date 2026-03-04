@@ -23,19 +23,16 @@ public class ESL {
     Meta meta;
 
 
-
-    public ESL(String id, String template, String nasa, String name, String meta, boolean doGenerate) {
+    public ESL(String id, String template, String nasa, String name, String meta, int pId) {
         this.id = id;
         this.template = template;
         this.nasa = nasa;
         this.name = name;
         this.meta = new Meta(meta);
-        if(doGenerate) {
-            try {
-                generate();
-            } catch (WriterException | IOException e) {
-                throw new RuntimeException(e);
-            }
+        try {
+            generate(pId);
+        } catch (WriterException | IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -59,14 +56,14 @@ public class ESL {
         return meta;
     }
 
-    public String generate() throws WriterException, IOException {
+    public String generate(int id) throws WriterException, IOException {
         int width = 100;
         int height = 100;
 
         BitMatrix matrix = new MultiFormatWriter()
                 .encode(nasa, BarcodeFormat.QR_CODE, width, height);
-        String name = nasa+".png";
-        Path path = FileSystems.getDefault().getPath(EslToolApplication.PATH+name);
+        String name = nasa + ".png";
+        Path path = FileSystems.getDefault().getPath(EslToolApplication.PATH + id + "/" + name);
         MatrixToImageWriter.writeToPath(matrix, "PNG", path);
 
         this.nasaCode = name;

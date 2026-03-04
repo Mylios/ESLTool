@@ -13,4 +13,12 @@ public class Returnable{
         this.esls = esls;
         this.folderID = folderID;
     }
+
+    public Map<String, List<ESL>> getEsls() {
+        return esls;
+    }
+
+    public int getFolderID() {
+        return folderID;
+    }
 }
