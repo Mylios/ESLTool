@@ -39,7 +39,6 @@ public class EslToolApplication {
                 LogManager.success("files/tmp has been created");
             }else{
                 LogManager.failure("files/tmp was failed to be created. Terminating.");
-                return;
             }
         }
     }

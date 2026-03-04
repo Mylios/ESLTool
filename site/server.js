@@ -4,8 +4,10 @@ const app = express();
 const fs = require("fs");
 const axios = require("axios");
 const multer = require("multer");
-const IP = "localhost";
+const IP = "127.0.0.1";
 const { promisify } = require('util');
+const PORT = 8080;
+const SPRINGP = 8081;
 
 const unlinkAsync = promisify(fs.unlink);
 
@@ -47,7 +49,7 @@ app.get("/results", (req, res) => {
 app.delete("/delete/:id", (req,res)=>{
   // unlinkAsync(path.join(__dirname, "files", req.params.id));
   console.log("deleting" + `: http://${IP}:8080/api/delete/${req.params.id}`)
-  fetch(`http://${IP}:8080/api/delete/${req.params.id}`,{method:"DELETE"});
+  fetch(`http://${IP}:${SPRINGP}/api/delete/${req.params.id}`,{method:"DELETE"});
 });
 
 app.get("/images/:id", (req, res) => {
@@ -77,8 +79,8 @@ app.post("/api/process",upload.single('file'), async (req, res) => {
   }
 });
 
-app.listen(3000, () => {
-    console.log("Sup, we runnin");
+app.listen(PORT, () => {
+    console.log("Frontend server running on " + PORT);
 });
 
 
@@ -89,7 +91,7 @@ async function toBackend(req, res, url) {
   if (!req.file) return res.status(400).send('No file uploaded.');
   console.log(`File uploaded: ${req.file.originalname}`);
   const absolutePath = path.resolve(__dirname, 'files/tmp/' + req.file.originalname);
-   const response = await fetch(`http://${IP}:8080/` + url, {
+   const response = await fetch(`http://${IP}:${SPRINGP}/` + url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ filePath: absolutePath.toString(), isles: (req.body.ailes == "{}") ? new Map() : req.body.ailes, addMissing: (req.body.addMissing=="true") })
