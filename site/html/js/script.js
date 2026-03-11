@@ -4,7 +4,18 @@ window.addEventListener("message", async (e) => {
     let imgs = await fetch("/images/"+e.data.folderID);
     imgs = await imgs.json();
 
+    console.log(esls);
+
+    const sortedEsls = Object.fromEntries(
+  Object.entries(esls).sort((a, b) => a[0].localeCompare(b[0]))
+);
+    esls = sortedEsls;
+
     let table = document.createElement("table");
+
+
+    // esls.sort((a, b) => a.name.localeCompare(b.name));
+
     for (let el in esls) {
         let tr = document.createElement("tr");
         let th = document.createElement("th");

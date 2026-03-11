@@ -89,12 +89,25 @@ app.listen(PORT, () => {
 
 async function toBackend(req, res, url) {
   if (!req.file) return res.status(400).send('No file uploaded.');
+
+  console.log(req.body);
   console.log(`File uploaded: ${req.file.originalname}`);
+
   const absolutePath = path.resolve(__dirname, 'files/tmp/' + req.file.originalname);
-   const response = await fetch(`http://${IP}:${SPRINGP}/` + url, {
+
+  const isles =
+    (req.body.ailes === "{}")
+      ? {}
+      : JSON.parse(req.body.ailes);   // <-- important
+
+  const response = await fetch(`http://${IP}:${SPRINGP}/` + url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ filePath: absolutePath.toString(), isles: (req.body.ailes == "{}") ? new Map() : req.body.ailes, addMissing: (req.body.addMissing=="true") })
+    body: JSON.stringify({
+      filePath: absolutePath.toString(),
+      isles: isles,
+      addMissing: req.body.addMissing === "true"
+    })
   });
 
   unlinkAsync(absolutePath);
