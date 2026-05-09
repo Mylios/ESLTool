@@ -1,0 +1,29 @@
+{
+    "manifest_version": 3,
+    "name": "ESL Tool",
+    "version": "1.0.0",
+    "action":{
+        "default_popup": "html/popup.html"
+
+    },
+    "background": {
+        "service_worker": "JavaScript/background.js",
+        "type": "module"
+    },
+    "content_scripts":[
+        {
+            "matches": ["<all_urls>"],
+            "js": ["JavaScript/content.js"]
+        }
+    ],
+    "permissions": [
+        "tabs",
+        "activeTab",
+        "scripting",
+        "storage"
+      ],
+    "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+    ]
+}
