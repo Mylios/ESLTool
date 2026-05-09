@@ -9,8 +9,13 @@ public class Meta {
         String[] split = data.split(" ");
         id = split[0];
         type = split[1];
-        ass = Integer.parseInt(split[2]);
-        date = split[3];
+        try {
+            ass = Integer.parseInt(split[2]);
+            date = split[3];
+        }catch (Exception e){
+            ass = -1;
+            date = split[2];
+        }
     }
 
     public String getId() {

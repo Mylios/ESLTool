@@ -89,7 +89,7 @@ public class EslToolApplication {
                 }
             }
             LogManager.log("Assigned " + gotten.size() + " groups for id="+id);
-            if (request.isAddMissing() && gotten.size() <= groups.size()) {
+            if (request.isAddMissing() && gotten.size() <= groups.keySet().stream().mapToInt(k -> groups.get(k).size()).reduce(Integer::sum).orElse(0)) {
                 Set<Integer> missing = new HashSet<>(groups.keySet());
                 missing.removeAll(gotten);
                 List<ESL> l = new ArrayList<>();
