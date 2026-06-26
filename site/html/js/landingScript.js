@@ -17,17 +17,6 @@ const translations = {
         dropText: "Drag & drop here, or click to select.",
         noFile: "No file selected",
         chooseFile: "Choose a file to enable processing.",
-        otherWorks: "Other works",
-        otherWorksDesc: "Explore related tools and experiments built around workflow automation and scraping.",
-        otherWorksChip: "References",
-        workStatus: "Prototype",
-        workCta: "View details",
-        work1Title: "Receipt Parser",
-        work1Desc: "Extracts structured line-items and totals from raw receipts for downstream matching.",
-        work2Title: "Label Generator",
-        work2Desc: "Generates consistent labels from templates with sane defaults and quick export.",
-        work3Title: "MOMO Data Helper",
-        work3Desc: "Scrapes and normalizes isle lists and selections from MOMO via the browser extension.",
         tagParsing: "Parsing",
         tagTemplates: "Templates",
         tagExport: "Export",
@@ -62,17 +51,6 @@ const translations = {
         dropText: "Sleep hierheen of klik om te selecteren.",
         noFile: "Geen bestand geselecteerd",
         chooseFile: "Kies een bestand om verwerking mogelijk te maken.",
-        otherWorks: "Andere projecten",
-        otherWorksDesc: "Bekijk gerelateerde tools en experimenten rond workflow-automatisering en scraping.",
-        otherWorksChip: "Referenties",
-        workStatus: "Prototype",
-        workCta: "Bekijk details",
-        work1Title: "Bonnen parser",
-        work1Desc: "Haalt gestructureerde regels en totalen uit bonnen voor verdere koppeling.",
-        work2Title: "Label generator",
-        work2Desc: "Maakt consistente labels vanuit templates met snelle export.",
-        work3Title: "MOMO data helper",
-        work3Desc: "Scrapet en normaliseert gangenlijsten en selecties uit MOMO via de browserextensie.",
         tagParsing: "Parseren",
         tagTemplates: "Templates",
         tagExport: "Export",
@@ -514,10 +492,10 @@ function manualAdd() {
  * Only includes currently selected names.
  */
 function buildSelectedAileMap() {
-    const out = new Map();
+    const out = {};
     selectedNames.forEach((name) => {
         if (Object.prototype.hasOwnProperty.call(parsedIsles, name)) {
-            out[name] = parsedIsles[name];
+            out[name]=  parsedIsles[name];
         }
     });
     return out;
@@ -552,6 +530,7 @@ async function processESL() {
         }
         const ailes = buildSelectedAileMap(); // can be empty
         console.log(ailes);
+        console.log(getIncludeMissingAssortimentGroups());
         if (!getIncludeMissingAssortimentGroups() && ailes.size == 0) {
             alert("Please enable missing aisles and/or select aisles to include")
             return;
@@ -596,6 +575,25 @@ async function processESL() {
             processBtn.classList.remove('btn-primary');
         }
     }
+
+    function replacer(key, value) {
+  if(value instanceof Map) {
+    return {
+      dataType: 'Map',
+      value: Array.from(value.entries()), // or with spread: value: [...value]
+    };
+  } else {
+    return value;
+  }
+}
+function reviver(key, value) {
+  if(typeof value === 'object' && value !== null) {
+    if (value.dataType === 'Map') {
+      return new Map(value.value);
+    }
+  }
+  return value;
+}
 
     function openResultWindow(result) {
         const newWindow = window.open("/results", "_blank");
